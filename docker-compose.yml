@@ -1,0 +1,41 @@
+services:
+  factorio:
+    image: factoriotools/factorio:stable
+    ports:
+     - "34197:34197/udp"
+     - "27015:27015/tcp"
+    volumes:
+     - /opt/factorio:/factorio
+    restart: unless-stopped
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    command: --interval 30
+    environment:
+      WATCHTOWER_REMOVE_VOLUMES: "true"
+      WATCHTOWER_ROLLING_RESTART: "true"
+      TZ: "Asia/Taipei"
+      WATCHTOWER_NOTIFICATION_REPORT: "true"
+      WATCHTOWER_NOTIFICATION_URL: >
+        discord://${DISCORD_WEBHOOK_TOKEN}@${DISCORD_WEBHOOK_ID}
+      WATCHTOWER_NOTIFICATION_TEMPLATE: |
+        {{- if .Report -}}
+          {{- with .Report -}}
+            {{- if ( or .Updated .Failed ) -}}
+        {{len .Scanned}} Scanned, {{len .Updated}} Updated, {{len .Failed}} Failed
+              {{- range .Updated}}
+        - {{.Name}} ({{.ImageName}}): {{.CurrentImageID.ShortID}} updated to {{.LatestImageID.ShortID}}
+              {{- end -}}
+              {{- range .Skipped}}
+        - {{.Name}} ({{.ImageName}}): {{.State}}: {{.Error}}
+              {{- end -}}
+              {{- range .Failed}}
+        - {{.Name}} ({{.ImageName}}): {{.State}}: {{.Error}}
+              {{- end -}}
+            {{- end -}}
+          {{- end -}}
+        {{- else -}}
+          {{range .Entries -}}{{.Message}}{{"\n"}}{{- end -}}
+        {{- end -}}
