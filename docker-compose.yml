@@ -7,6 +7,9 @@ services:
     volumes:
       - /opt/factorio:/factorio
     restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.scope=${COMPOSE_PROJECT_NAME}"
+
   watchtower:
     image: containrrr/watchtower
     volumes:
@@ -16,6 +19,7 @@ services:
     environment:
       WATCHTOWER_REMOVE_VOLUMES: "true"
       WATCHTOWER_ROLLING_RESTART: "true"
+      WATCHTOWER_SCOPE: "${COMPOSE_PROJECT_NAME}"
       TZ: "Asia/Taipei"
       WATCHTOWER_NOTIFICATION_REPORT: "true"
       WATCHTOWER_NOTIFICATION_URL: >
