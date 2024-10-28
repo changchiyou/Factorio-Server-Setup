@@ -2,10 +2,10 @@ services:
   factorio:
     image: factoriotools/factorio:stable
     ports:
-     - "34197:34197/udp"
-     - "27015:27015/tcp"
+      - "34197:34197/udp"
+      - "27015:27015/tcp"
     volumes:
-     - /opt/factorio:/factorio
+      - /opt/factorio:/factorio
     restart: unless-stopped
   watchtower:
     image: containrrr/watchtower
@@ -24,18 +24,42 @@ services:
         {{- if .Report -}}
           {{- with .Report -}}
             {{- if ( or .Updated .Failed ) -}}
-        {{len .Scanned}} Scanned, {{len .Updated}} Updated, {{len .Failed}} Failed
+              **Watchtower Report Summary**
+              - **Scanned:** {{len .Scanned}}
+              - **Updated:** {{len .Updated}}
+              - **Failed:** {{len .Failed}}
+
+              {{- if .Updated}}
+              **Updated Containers:**
               {{- range .Updated}}
-        - {{.Name}} ({{.ImageName}}): {{.CurrentImageID.ShortID}} updated to {{.LatestImageID.ShortID}}
+              - **{{.Name}}** ({{.ImageName}})
+                - Current ID: `{{.CurrentImageID.ShortID}}`
+                - Updated to: `{{.LatestImageID.ShortID}}`
               {{- end -}}
+              {{- end}}
+
+              {{- if .Skipped}}
+              **Skipped Containers:**
               {{- range .Skipped}}
-        - {{.Name}} ({{.ImageName}}): {{.State}}: {{.Error}}
+              - **{{.Name}}** ({{.ImageName}})
+                - Status: `{{.State}}`
+                - Error: `{{.Error}}`
               {{- end -}}
+              {{- end}}
+
+              {{- if .Failed}}
+              **Failed Containers:**
               {{- range .Failed}}
-        - {{.Name}} ({{.ImageName}}): {{.State}}: {{.Error}}
+              - **{{.Name}}** ({{.ImageName}})
+                - Status: `{{.State}}`
+                - Error: `{{.Error}}`
               {{- end -}}
+              {{- end}}
             {{- end -}}
           {{- end -}}
         {{- else -}}
-          {{range .Entries -}}{{.Message}}{{"\n"}}{{- end -}}
+          **General Notifications:**
+          {{range .Entries -}}
+          {{.Message}}{{"\n"}}
+          {{- end -}}
         {{- end -}}
