@@ -19,6 +19,7 @@ services:
     environment:
       WATCHTOWER_REMOVE_VOLUMES: "true"
       WATCHTOWER_ROLLING_RESTART: "true"
+      WATCHTOWER_CLEANUP: "true"
       WATCHTOWER_SCOPE: "${COMPOSE_PROJECT_NAME}"
       TZ: "Asia/Taipei"
       WATCHTOWER_NOTIFICATION_REPORT: "true"
