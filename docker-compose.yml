@@ -17,6 +17,7 @@ services:
       - /root/.docker/config.json:/config.json
     command: --interval 30
     environment:
+      WATCHTOWER_NO_STARTUP_MESSAGE: "true"
       WATCHTOWER_REMOVE_VOLUMES: "true"
       WATCHTOWER_ROLLING_RESTART: "true"
       WATCHTOWER_CLEANUP: "true"
