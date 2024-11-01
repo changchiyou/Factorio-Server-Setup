@@ -1,6 +1,9 @@
 services:
   factorio:
+    container_name: Factorio
     image: factoriotools/factorio:stable
+    environment:
+      CONSOLE_LOG_LOCATION: "/factorio/console.log"
     ports:
       - "34197:34197/udp"
       - "27015:27015/tcp"
@@ -10,7 +13,23 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.scope=${COMPOSE_PROJECT_NAME}"
 
+  factorigochatbot:
+    container_name: FactoriGOChatBot
+    image: mattie112/factorigo-chat-bot:latest
+    environment:
+      DISCORD_TOKEN: "${FACTORIOGOCHATBOT_DISCORD_TOKEN}"
+      DISCORD_CHANNEL_ID: "${FACTORIOGOCHATBOT_DISCORD_CHANNEL_ID}"
+      RCON_IP: "http://factorio"
+      RCON_PORT: "${RCON_PORT-27015}"
+      RCON_PASSWORD: "${RCONPW}"
+      FACTORIO_LOG: "/opt-factorio/console.log"
+      ACHIEVEMENT_MODE: "true"
+    volumes:
+      - /opt/factorio:/opt-factorio
+
+
   watchtower:
+    container_name: Watchtower
     image: containrrr/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -25,7 +44,7 @@ services:
       TZ: "Asia/Taipei"
       WATCHTOWER_NOTIFICATION_REPORT: "true"
       WATCHTOWER_NOTIFICATION_URL: >
-        discord://${DISCORD_WEBHOOK_TOKEN}@${DISCORD_WEBHOOK_ID}
+        discord://${WATCHTOWER_DISCORD_WEBHOOK_TOKEN}@${WATCHTOWER_DISCORD_WEBHOOK_ID}
       WATCHTOWER_NOTIFICATION_TEMPLATE: |
         {{- if .Report -}}
           {{- with .Report -}}
