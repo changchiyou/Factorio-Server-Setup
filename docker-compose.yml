@@ -12,6 +12,9 @@ services:
     restart: unless-stopped
     labels:
       - "com.centurylinklabs.watchtower.scope=${COMPOSE_PROJECT_NAME}"
+    networks:
+      my_network:
+        ipv4_address: "${FACTORIO_CONTAINER_IP-172.20.0.2}"
 
   factorigochatbot:
     container_name: FactoriGOChatBot
@@ -19,14 +22,15 @@ services:
     environment:
       DISCORD_TOKEN: "${FACTORIOGOCHATBOT_DISCORD_TOKEN}"
       DISCORD_CHANNEL_ID: "${FACTORIOGOCHATBOT_DISCORD_CHANNEL_ID}"
-      RCON_IP: "http://factorio"
+      RCON_IP: "${FACTORIO_CONTAINER_IP-172.20.0.2}"
       RCON_PORT: "${RCON_PORT-27015}"
       RCON_PASSWORD: "${RCONPW}"
       FACTORIO_LOG: "/opt-factorio/console.log"
       ACHIEVEMENT_MODE: "true"
     volumes:
       - /opt/factorio:/opt-factorio
-
+    networks:
+      - my_network
 
   watchtower:
     container_name: Watchtower
@@ -88,3 +92,12 @@ services:
           {{.Message}}{{"\n"}}
           {{- end -}}
         {{- end -}}
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
