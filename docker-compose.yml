@@ -9,23 +9,35 @@ services:
       - "27015:27015/tcp"
     volumes:
       - /opt/factorio:/factorio
-    restart: unless-stopped
+    restart: always
     labels:
       - "com.centurylinklabs.watchtower.scope=${COMPOSE_PROJECT_NAME}"
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q 'Starting RCON interface at IP ADDR' /factorio/factorio-current.log || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 2s
 
   factorigochatbot:
     container_name: FactoriGOChatBot
     image: mattie112/factorigo-chat-bot:latest
     environment:
+      LOG_LEVEL: debug
       DISCORD_TOKEN: "${FACTORIOGOCHATBOT_DISCORD_TOKEN}"
       DISCORD_CHANNEL_ID: "${FACTORIOGOCHATBOT_DISCORD_CHANNEL_ID}"
-      RCON_IP: "http://factorio"
+      RCON_IP: "factorio"
       RCON_PORT: "${RCON_PORT-27015}"
       RCON_PASSWORD: "${RCONPW}"
       FACTORIO_LOG: "/opt-factorio/console.log"
       ACHIEVEMENT_MODE: "true"
+      SEND_JOIN_LEAVE: "true"
     volumes:
       - /opt/factorio:/opt-factorio
+    restart: always
+    depends_on:
+      factorio:
+        condition: service_healthy
 
   watchtower:
     container_name: Watchtower
@@ -87,3 +99,4 @@ services:
           {{.Message}}{{"\n"}}
           {{- end -}}
         {{- end -}}
+    restart: always
