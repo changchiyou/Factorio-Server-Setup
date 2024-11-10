@@ -35,6 +35,8 @@ services:
     volumes:
       - /opt/factorio:/opt-factorio
     restart: always
+    labels:
+      - "com.centurylinklabs.watchtower.scope=${COMPOSE_PROJECT_NAME}"
     depends_on:
       factorio:
         condition: service_healthy
