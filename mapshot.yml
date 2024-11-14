@@ -1,0 +1,68 @@
+services:
+  mapshot-server:
+    container_name: mapshot-server
+    build:
+      context: .
+      dockerfile: Dockerfile-mapshot
+    image: factorio-mapshot:latest
+    volumes:
+      - ${FACTORIO_DIR_PATH}/saves:/opt-factorio-saves
+      - ${MAPSHOT_DIR_PATH}:/mapshot
+    ports:
+      - "5003:8080"
+    environment:
+      MAPSHOT_MODE: "serve"
+    restart: always
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    runtime: nvidia
+
+  mapshot-renderer:
+    container_name: mapshot-renderer
+    image: factorio-mapshot:latest
+    volumes:
+      - ${FACTORIO_DIR_PATH}/saves:/opt-factorio-saves
+      - ${MAPSHOT_DIR_PATH}:/mapshot
+    environment:
+      RELEASE_TYPE: ${RELEASE_TYPE}
+      FACTORIO_USERNAME: ${FACTORIO_USERNAME}
+      FACTORIO_TOKEN: ${FACTORIO_TOKEN}
+      FACTORIO_SAVE: /opt-factorio-saves/${FACTORIO_SAVE}
+      MAPSHOT_AREA: ${MAPSHOT_AREA-_all_}
+      MAPSHOT_JPEG_QUALITY: ${MAPSHOT_JPEG_QUALITY-95}
+      MAPSHOT_MINIMUM_JPEG_QUALITY: ${MAPSHOT_MINIMUM_JPEG_QUALITY-95}
+      MAPSHOT_MINIMUM_TILES: ${MAPSHOT_MINIMUM_TILES-64}
+      MAPSHOT_MODE: "render"
+      MAPSHOT_SURFACES_TO_RENDER: ${MAPSHOT_SURFACES_TO_RENDER-_all_}
+      MAPSHOT_VERBOSE_MAPSHOT_LOG_LEVEL_INT: ${MAPSHOT_VERBOSE_MAPSHOT_LOG_LEVEL_INT-9}
+      MAPSHOT_INTERVAL: ${MAPSHOT_INTERVAL-600}
+    restart: always
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    runtime: nvidia
+
+  restarter:
+    container_name: mapshot-renderer-restarter
+    image: docker:cli
+    restart: unless-stopped
+    volumes: ["/var/run/docker.sock:/var/run/docker.sock"]
+    entrypoint: ["/bin/sh","-c"]
+    command:
+      - |
+        while true; do
+          if [ "$(date +'%M')" = '00' ] || [ "$(date +'%M')" = '30' ]; then
+            docker stop mapshot-renderer
+            docker start mapshot-renderer
+          fi
+          sleep 60
+        done

@@ -8,7 +8,7 @@ services:
       - "34197:34197/udp"
       - "27015:27015/tcp"
     volumes:
-      - /opt/factorio:/factorio
+      - ${FACTORIO_DIR_PATH}:/factorio
     restart: always
     labels:
       - "com.centurylinklabs.watchtower.scope=${COMPOSE_PROJECT_NAME}"
@@ -33,7 +33,7 @@ services:
       ACHIEVEMENT_MODE: "true"
       SEND_JOIN_LEAVE: "true"
     volumes:
-      - /opt/factorio:/opt-factorio
+      - ${FACTORIO_DIR_PATH}:/opt-factorio
     restart: always
     labels:
       - "com.centurylinklabs.watchtower.scope=${COMPOSE_PROJECT_NAME}"
