@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "Checking if Factorio exists"
 if [ ! -f "${MAPSHOT_ROOT_DIRECTORY:-"/mapshot"}/factorio/bin/x64/factorio" ]; then
     echo "Factorio does not exist, downloading..."
@@ -14,6 +16,19 @@ if [ ! -f "${MAPSHOT_ROOT_DIRECTORY:-"/mapshot"}/factorio/bin/x64/factorio" ]; t
     tar xvf /root/factorio-linux64.tar.xz -C ${MAPSHOT_ROOT_DIRECTORY:-"/mapshot"} && mkdir -p ${MAPSHOT_FACTORIO_DATA_DIRECTORY:-"${MAPSHOT_ROOT_DIRECTORY:-"/mapshot"}/factorio"}/mods && echo '{}' >${MAPSHOT_FACTORIO_DATA_DIRECTORY:-"${MAPSHOT_ROOT_DIRECTORY:-"/mapshot"}/factorio"}/mods/mod-list.json
 else
     echo "Factorio exists, proceeding without download"
+fi
+
+MAPSHOT_SAVE_NAME=$(basename "$FACTORIO_SAVE" .zip)
+MAPSHOT_SCRIPT_OUTPUT_DIR=${MAPSHOT_ROOT_DIRECTORY:-"/mapshot"}/factorio/script-output/mapshot/$MAPSHOT_SAVE_NAME
+
+# Delete old d-* folders except the latest one
+if [ -d "$MAPSHOT_SCRIPT_OUTPUT_DIR" ]; then
+    echo "Cleaning up old d-* directories..."
+    cd "$MAPSHOT_SCRIPT_OUTPUT_DIR"
+    ls -dt d-* | tail -n +2 | xargs rm -rf
+    echo "Cleanup complete."
+else
+    echo "No previous mapshot directories to clean."
 fi
 
 if [ "$MAPSHOT_MODE" == "render" ]; then
