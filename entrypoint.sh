@@ -17,7 +17,7 @@ if [ ! -f "$MAPSHOT_FACTORIO_BINARY_PATH" ]; then
         echo "Exiting..."
         exit 1
     fi
-    curl "https://www.factorio.com/get-download/${RELEASE_VERSION:-"latest"}/${RELEASE_TYPE:-"alpha"}/linux64?username=$FACTORIO_USERNAME&token=$FACTORIO_TOKEN" -L -o /root/factorio-linux64.tar.xz
+    curl "https://www.factorio.com/get-download/${RELEASE_VERSION:-"stable"}/${RELEASE_TYPE:-"alpha"}/linux64?username=$FACTORIO_USERNAME&token=$FACTORIO_TOKEN" -L -o /root/factorio-linux64.tar.xz
     echo "Extracting..."
     tar xvf /root/factorio-linux64.tar.xz -C "$MAPSHOT_ROOT_DIRECTORY"
     mkdir -p "$MAPSHOT_FACTORIO_DATA_DIRECTORY/mods"
